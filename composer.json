@@ -1,0 +1,36 @@
+{
+    "name": "bfg/attributes",
+    "description": "Designed to work with PHP 8 attributes for classes",
+    "type": "bfg-app",
+    "keywords": ["laravel", "extension", "attributes"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "bfg"
+        }
+    ],
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.0.0",
+        "bfg/installer": "*"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "Bfg\\Attributes\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bfg\\Attributes\\ServiceProvider"
+            ],
+            "aliases": {
+                "Attributes": "Bfg\\Attributes\\Facades\\AttributesFacade"
+            }
+        }
+    }
+}
