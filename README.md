@@ -46,6 +46,17 @@ Or the same search but in a specific folder:
     \Attribute::TARGET_METHOD // Optional, for faster scanning (\Attribute::TARGET_ALL by default)
 );
 ```
+Or the same search but in a specific class:
+```php
+\Attributes::inClass(
+    MyAnyClassNamespace::class, // Enter any class in which the search will be made
+    MyAttribute::class, // Find attribute
+    function (MyAttribute $attribute, ReflectionMethod $method, ReflectionClass $class) {
+        // Process with my attribute
+    }, 
+    \Attribute::TARGET_METHOD // Optional, for faster scanning (\Attribute::TARGET_ALL by default)
+);
+```
 
 ## Supported attributes
 The package only supports class attributes, 
