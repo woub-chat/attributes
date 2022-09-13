@@ -39,6 +39,7 @@ Or the same search but in a specific folder:
 ```php
 \Attributes::inPath(
     app_path(), // Enter an application path
+)->find(
     MyAttribute::class, // Find attribute
     function (MyAttribute $attribute, ReflectionMethod $method, ReflectionClass $class) {
         // Process with my attribute
@@ -49,7 +50,8 @@ Or the same search but in a specific folder:
 Or the same search but in a specific class:
 ```php
 \Attributes::inClass(
-    MyAnyClassNamespace::class, // Enter any class in which the search will be made
+    MyAnyClassNamespace::class // Enter any class in which the search will be made
+)->find(
     MyAttribute::class, // Find attribute
     function (MyAttribute $attribute, ReflectionMethod $method, ReflectionClass $class) {
         // Process with my attribute
