@@ -33,37 +33,27 @@ class Attributes
 
     /**
      * @param  string  $path
-     * @param  string  $attribute
-     * @param  callable  $event
-     * @param  int  $target_on
-     * @return int
+     * @return $this
      */
     public function inPath(
-        string $path, string $attribute, callable $event, int $target_on = \Attribute::TARGET_ALL
-    ): int {
-        $p = $this->path;
+        string $path
+    ): static {
         $this->path = $path;
-        $result = $this->find($attribute, $event, $target_on);
-        $this->path = $p;
-        return $result;
+        return $this;
     }
 
     /**
      * @param  string  $class
-     * @param  string  $attribute
-     * @param  callable  $event
-     * @param  int  $target_on
-     * @return int
+     * @return $this
      * @throws ReflectionException
      */
     public function inClass(
-        string $class, string $attribute, callable $event, int $target_on = \Attribute::TARGET_ALL
-    ): int {
-        $c = $this->classes;
+        string $class
+    ): static {
+
         $this->classes = collect([new ReflectionClass($class)]);
-        $result = $this->find($attribute, $event, $target_on);
-        $this->classes = $c;
-        return $result;
+
+        return $this;
     }
 
     /**
@@ -73,6 +63,23 @@ class Attributes
      * @return int
      */
     public function find(string $attribute, callable $event, int $target_on = \Attribute::TARGET_ALL): int
+    {
+        $attributes = $this->getAttributes($attribute, $target_on);
+
+        foreach ($attributes as $attribute) {
+
+            call_user_func_array($event, array_values($attribute));
+        }
+
+        return count($attributes);
+    }
+
+    /**
+     * @param  string  $attribute
+     * @param  int  $target_on
+     * @return array
+     */
+    public function getAttributes(string $attribute, int $target_on = \Attribute::TARGET_ALL): array
     {
         $classes = $this->classes();
 
@@ -88,12 +95,7 @@ class Attributes
             $attributes = (new GlobalTarget())->run($classes, $attribute);
         }
 
-        foreach ($attributes as $attribute) {
-
-            call_user_func_array($event, array_values($attribute));
-        }
-
-        return count($attributes);
+        return $attributes;
     }
 
     /**
