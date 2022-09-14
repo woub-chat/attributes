@@ -2,6 +2,7 @@
 
 namespace Bfg\Attributes;
 
+use Bfg\Attributes\Items\AttributeItem;
 use Bfg\Attributes\Scanner\ScanClasses;
 use Bfg\Attributes\Scanner\ScanDirectories;
 use Bfg\Attributes\Scanner\ScanFiles;
@@ -62,25 +63,31 @@ class Attributes
      * @param  int  $target_on
      * @return int
      */
-    public function find(string $attribute, callable $event, int $target_on = \Attribute::TARGET_ALL): int
-    {
+    public function find(
+        string $attribute,
+        callable $event,
+        int $target_on = \Attribute::TARGET_ALL
+    ): int {
+
         $attributes = $this->getAttributes($attribute, $target_on);
 
         foreach ($attributes as $attribute) {
 
-            call_user_func_array($event, array_values($attribute));
+            app()->call($event, $attribute->toArray());
         }
-
         return count($attributes);
     }
 
     /**
      * @param  string  $attribute
      * @param  int  $target_on
-     * @return array
+     * @return AttributeItem[]|Collection
      */
-    public function getAttributes(string $attribute, int $target_on = \Attribute::TARGET_ALL): array
-    {
+    public function getAttributes(
+        string $attribute,
+        int $target_on = \Attribute::TARGET_ALL
+    ): Collection {
+
         $classes = $this->classes();
 
         if ($target_on === \Attribute::TARGET_CLASS) {
@@ -95,11 +102,11 @@ class Attributes
             $attributes = (new GlobalTarget())->run($classes, $attribute);
         }
 
-        return $attributes;
+        return collect($attributes);
     }
 
     /**
-     * @return Collection
+     * @return Collection|ReflectionClass[]
      */
     public function classes(): Collection
     {

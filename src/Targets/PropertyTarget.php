@@ -1,1 +1,34 @@
-<?phpnamespace Bfg\Attributes\Targets;use Illuminate\Support\Collection;/** * Class PropertyTarget * @package Bfg\Attributes\Targets */class PropertyTarget extends TargetInterface{    /**     * @param  Collection  $classes     * @param  string  $attribute     * @return array     */    public function run(Collection $classes, string $attribute): array    {        return $classes->map(function (\ReflectionClass $class) use ($attribute) {            $properties = [];            foreach ($class->getProperties() as $property) {                if ($attrs = $this->getAttributes($property, $attribute)) {                    foreach ($attrs as $attr) {                        $properties[] = [                            'attribute' => $attr,                            'property' => $property,                            'ref' => $class,                        ];                    }                }            }            return $properties;        })->collapse()->toArray();    }}
+<?php
+
+namespace Bfg\Attributes\Targets;
+
+use Bfg\Attributes\Items\AttributePropertyItem;
+use Illuminate\Support\Collection;
+use ReflectionClass;
+
+class PropertyTarget extends TargetInterface
+{
+    /**
+     * @param  Collection  $classes
+     * @param  string  $attribute
+     * @return array
+     */
+    public function run(Collection $classes, string $attribute): array
+    {
+        return $classes->map(function (ReflectionClass $class) use ($attribute) {
+            $properties = [];
+            foreach ($class->getProperties() as $property) {
+                if ($attrs = $this->getAttributes($property, $attribute)) {
+                    foreach ($attrs as $attr) {
+                        $properties[] = new AttributePropertyItem(
+                            attribute: $attr,
+                            ref: $class,
+                            property: $property
+                        );
+                    }
+                }
+            }
+            return $properties;
+        })->collapse()->toArray();
+    }
+}
