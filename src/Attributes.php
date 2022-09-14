@@ -101,7 +101,7 @@ class Attributes
     /**
      * @return Collection
      */
-    protected function classes(): Collection
+    public function classes(): Collection
     {
         if ($this->classes) {
             return $this->classes;
