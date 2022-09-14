@@ -2,7 +2,12 @@
 
 namespace Bfg\Attributes;
 
+use Attribute;
+use Bfg\Attributes\Items\AttributeClassItem;
+use Bfg\Attributes\Items\AttributeConstantItem;
 use Bfg\Attributes\Items\AttributeItem;
+use Bfg\Attributes\Items\AttributeMethodItem;
+use Bfg\Attributes\Items\AttributePropertyItem;
 use Bfg\Attributes\Scanner\ScanClasses;
 use Bfg\Attributes\Scanner\ScanDirectories;
 use Bfg\Attributes\Scanner\ScanFiles;
@@ -25,18 +30,28 @@ class Attributes
     /**
      * @var string|null
      */
-    public ?string $path = null;
+    protected ?string $path = null;
 
     /**
      * @var Collection|null
      */
-    public ?Collection $classes = null;
+    protected ?Collection $classes = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $target_on = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $attribute = null;
 
     /**
      * @param  string  $path
      * @return $this
      */
-    public function inPath(
+    public function wherePath(
         string $path
     ): static {
         $this->path = $path;
@@ -48,7 +63,7 @@ class Attributes
      * @return $this
      * @throws ReflectionException
      */
-    public function inClass(
+    public function whereClass(
         string $class
     ): static {
 
@@ -58,51 +73,109 @@ class Attributes
     }
 
     /**
-     * @param  string  $attribute
+     * @return $this
+     */
+    public function whereTargetClass(): static
+    {
+        $this->target_on = Attribute::TARGET_CLASS;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function whereTargetProperty(): static
+    {
+        $this->target_on = Attribute::TARGET_PROPERTY;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function whereTargetConstant(): static
+    {
+        $this->target_on = Attribute::TARGET_CLASS_CONSTANT;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function whereTargetMethod(): static
+    {
+        $this->target_on = Attribute::TARGET_METHOD;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function whereAttribute(?string $attributeClass): static
+    {
+        $this->attribute = $attributeClass;
+
+        return $this;
+    }
+
+
+
+
+
+    /**
      * @param  callable  $event
-     * @param  int  $target_on
      * @return int
      */
-    public function find(
-        string $attribute,
+    public function map(
         callable $event,
-        int $target_on = \Attribute::TARGET_ALL
     ): int {
 
-        $attributes = $this->getAttributes($attribute, $target_on);
+        $attributes = $this->all();
 
         foreach ($attributes as $attribute) {
 
-            app()->call($event, $attribute->toArray());
+            call_user_func($event, $attribute);
         }
         return count($attributes);
     }
 
     /**
-     * @param  string  $attribute
-     * @param  int  $target_on
-     * @return AttributeItem[]|Collection
+     * @return AttributeItem[]|AttributePropertyItem[]|AttributeMethodItem[]|AttributeClassItem[]|AttributeConstantItem[]|Collection
      */
-    public function getAttributes(
-        string $attribute,
-        int $target_on = \Attribute::TARGET_ALL
-    ): Collection {
+    public function all(): Collection {
 
         $classes = $this->classes();
 
-        if ($target_on === \Attribute::TARGET_CLASS) {
-            $attributes = (new ClassTarget())->run($classes, $attribute);
-        } else if ($target_on === \Attribute::TARGET_PROPERTY) {
-            $attributes = (new PropertyTarget())->run($classes, $attribute);
-        } else if ($target_on === \Attribute::TARGET_CLASS_CONSTANT) {
-            $attributes = (new ClassConstantTarget())->run($classes, $attribute);
-        } else if ($target_on === \Attribute::TARGET_METHOD) {
-            $attributes = (new MethodTarget())->run($classes, $attribute);
+        $target_on = $this->target_on ?: Attribute::TARGET_ALL;
+
+        if (! $this->attribute) {
+            $attributes = [];
+        } else if ($target_on === Attribute::TARGET_CLASS) {
+            $attributes = (new ClassTarget())->run($classes, $this->attribute);
+        } else if ($target_on === Attribute::TARGET_PROPERTY) {
+            $attributes = (new PropertyTarget())->run($classes, $this->attribute);
+        } else if ($target_on === Attribute::TARGET_CLASS_CONSTANT) {
+            $attributes = (new ClassConstantTarget())->run($classes, $this->attribute);
+        } else if ($target_on === Attribute::TARGET_METHOD) {
+            $attributes = (new MethodTarget())->run($classes, $this->attribute);
         } else {
-            $attributes = (new GlobalTarget())->run($classes, $attribute);
+            $attributes = (new GlobalTarget())->run($classes, $this->attribute);
         }
 
         return collect($attributes);
+    }
+
+    /**
+     * @param  callable|null  $callback
+     * @return AttributeItem[]|AttributePropertyItem[]|AttributeMethodItem[]|AttributeClassItem[]|AttributeConstantItem[]|Collection
+     */
+    public function filter(callable $callback = null): Collection
+    {
+        return $this->all()->filter($callback);
     }
 
     /**
@@ -127,5 +200,10 @@ class Attributes
                 )
             ))->classes;
         }
+    }
+
+    public static function new(string $attribute = null): static
+    {
+        return (new static())->whereAttribute($attribute);
     }
 }
