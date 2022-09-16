@@ -3,9 +3,8 @@
 namespace Bfg\Attributes\Items;
 
 use ArrayAccess;
-use Illuminate\Contracts\Support\Arrayable;
 
-abstract class AttributeItem implements ArrayAccess, Arrayable
+abstract class AttributeItem implements ArrayAccess
 {
     public function offsetExists(mixed $offset): bool
     {
@@ -25,13 +24,5 @@ abstract class AttributeItem implements ArrayAccess, Arrayable
     public function offsetUnset(mixed $offset)
     {
 
-    }
-
-    public function toArray(): array
-    {
-        return collect(get_class_vars(static::class))
-            ->mapWithKeys(
-                fn ($prop) => [$prop => $this->{$prop}]
-            )->toArray();
     }
 }
