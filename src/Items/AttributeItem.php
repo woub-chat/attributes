@@ -29,7 +29,7 @@ abstract class AttributeItem implements ArrayAccess, Arrayable
 
     public function toArray(): array
     {
-        return collect(class_parents($this))
+        return collect(get_class_vars(static::class))
             ->mapWithKeys(
                 fn ($prop) => [$prop => $this->{$prop}]
             )->toArray();

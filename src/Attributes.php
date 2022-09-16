@@ -188,6 +188,9 @@ class Attributes
         } else if (!$this->path) {
             return app(ScanClasses::class)->classes;
         } else {
+            if (! is_dir($this->path)) {
+                return collect();
+            }
             $fs = app(Filesystem::class);
             return (new ScanClasses(
                 $fs,
