@@ -47,6 +47,10 @@ class Attributes
      */
     protected ?string $attribute = null;
 
+    protected static ?Collection $cacheClass = null;
+
+    protected static array $cachePaths = [];
+
     /**
      * @param  string  $path
      * @return $this
@@ -186,13 +190,19 @@ class Attributes
         if ($this->classes) {
             return $this->classes;
         } else if (!$this->path) {
-            return app(ScanClasses::class)->classes;
+            if (static::$cacheClass) {
+                return static::$cacheClass;
+            }
+            return static::$cacheClass = app(ScanClasses::class)->classes;
         } else {
             if (! is_dir($this->path)) {
                 return collect();
             }
+            if (isset(static::$cachePaths[$this->path])) {
+                return static::$cachePaths[$this->path];
+            }
             $fs = app(Filesystem::class);
-            return (new ScanClasses(
+            return static::$cachePaths[$this->path] = (new ScanClasses(
                 $fs,
                 new ScanFiles(
                     $fs,
