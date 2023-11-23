@@ -45,6 +45,14 @@ use Bfg\Attributes\Attributes;
 
 Attributes::new(MyAttribute::class)
     ->wherePath(app_path())
+    ->map(function (AttributePropertyItem|AttributeMethodItem|AttributeClassItem|AttributeConstantItem $item) {
+        // Process with my attribute
+    });
+```
+Or find only class attributes
+```php
+Attributes::new(MyAttribute::class)
+    ->wherePath(app_path())
     ->whereTargetClass()
     ->map(function (AttributeClassItem $item) {
         // Process with my attribute
