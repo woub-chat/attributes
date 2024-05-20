@@ -1,14 +1,9 @@
 {
-    "name": "bfg/attributes",
+    "name": "woub-chat/attributes",
     "description": "Designed to work with PHP 8 attributes for classes",
-    "type": "bfg-app",
+    "type": "app",
     "keywords": ["laravel", "extension", "attributes"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "bfg"
-        }
-    ],
     "prefer-stable": true,
     "require": {
         "php": ">=8.0.0"
